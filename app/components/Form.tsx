@@ -1,8 +1,8 @@
 import {useForm} from "react-hook-form"
-import {FormData} from "@/types"
+import {FormData , UserSchema, ValidFieldNames} from "@/types"
 import FormField from "./FormField"
-
-
+import { zodResolver } from "@hookform/resolvers/zod"
+import axios from "axios"
 
 function Form (){
   const {
@@ -10,10 +10,37 @@ function Form (){
     handleSubmit,
     formState:{errors},
     setError,
-  } = useForm<FormData>()
+  } = useForm<FormData>({
+    resolver: zodResolver(UserSchema)
+  })
 
   const onSubmit =  async (data:FormData)=>{
-    console.log("SUCCESS" , data)
+  try {
+    const response = await axios.post("/api/form" , data)
+    const {errors = {}}=response.data
+
+
+    const fieldErrorMapping: Record<string, ValidFieldNames>={
+      email:"email",
+      githubUrl:"githubUrl",
+      yearsOfExperience:"yearsOfExperience",
+      password:"password",
+      confirmPassword:"confirmPassword"
+
+    };
+    const fieldWithError = Object.keys(fieldErrorMapping).find(
+      (field) =>errors[field]
+    )
+    if (fieldWithError) {
+      setError(fieldErrorMapping[fieldWithError],{
+        type:"server",
+        message:errors[fieldWithError]
+      })
+    }
+  } catch (error) {
+
+    alert("Submitting form failed")
+  }
   }
 
   return (
