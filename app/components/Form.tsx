@@ -58,6 +58,7 @@ function Form (){
         register={register}
         error={errors.confirmPassword}
         />
+        <button type="submit" className="submit-button">Submit</button>
       </div>
     </form>
   )
